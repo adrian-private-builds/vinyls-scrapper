@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vinyl Wishlist</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Ovo&family=Mulish:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0e0e0e;
+    --surface: #181818;
+    --border: #2a2a2a;
+    --text: #e8e4dc;
+    --muted: #999;
+    --accent: #c8a96e;
+    --accent2: #e8c88e;
+    --green: #4a9;
+    --red: #c0392b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Mulish', sans-serif;
+    min-height: 100vh;
+  }
+
+  /* ── Header ── */
+  header {
+    padding: 4rem 4rem 2rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  .header-left h1 {
+    font-family: 'Ovo', serif;
+    font-size: clamp(2.5rem, 6vw, 5rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    color: var(--text);
+  }
+
+  .header-left h1 em {
+    color: var(--accent);
+    font-style: italic;
+  }
+
+  .h1-sub {
+    font-size: 0.38em;
+    font-weight: 400;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-family: 'Mulish', sans-serif;
+  }
+
+  .header-left .subtitle {
+    margin-top: 0.75rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .header-right {
+    text-align: right;
+    font-size: 0.8rem;
+    color: var(--muted);
+    line-height: 1.8;
+  }
+
+  .header-right .count {
+    font-family: 'Ovo', serif;
+    font-size: 2rem;
+    color: var(--accent);
+    display: block;
+    line-height: 1;
+  }
+
+  /* ── Controls bar ── */
+  .controls {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 0.75rem 4rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .sort-btn {
+    background: none;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    font-family: 'Mulish', sans-serif;
+    font-size: 0.8rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.55rem;
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s, background 0.15s;
+  }
+  .sort-btn.active {
+    color: var(--accent);
+    border-color: var(--accent);
+    background: rgba(200,169,110,0.07);
+  }
+  .sort-btn:hover:not(.active) {
+    color: var(--text);
+    border-color: #444;
+  }
+
+  .search-wrap {
+    margin-left: auto;
+    position: relative;
+  }
+  #search {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Mulish', sans-serif;
+    font-size: 0.8rem;
+    padding: 0.35rem 0.6rem;
+    width: 200px;
+    border-radius: 2px;
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  #search:focus { border-color: var(--accent); }
+  #search::placeholder { color: var(--muted); opacity: 0.6; }
+
+  /* ── Content ── */
+  .content {
+    padding: 2rem 4rem;
+  }
+
+  .album-list {
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Album row ── */
+  @keyframes rowIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .album-row {
+    display: grid;
+    grid-template-columns: 80px 1fr repeat(3, minmax(140px, 180px));
+    gap: 1.5rem;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border);
+    animation: rowIn 0.3s ease both;
+    transition: background 0.15s;
+  }
+  .album-row:hover {
+    background: rgba(255,255,255,0.015);
+  }
+  .album-row.has-error {
+    opacity: 0.5;
+  }
+
+  .cover-wrap {
+    width: 80px;
+    height: 80px;
+    flex-shrink: 0;
+    overflow: hidden;
+    background: #111;
+  }
+  .cover-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    filter: grayscale(15%);
+    transition: filter 0.3s;
+  }
+  .album-row:hover .cover-wrap img {
+    filter: grayscale(0%);
+  }
+  .cover-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Ovo', serif;
+    font-size: 2rem;
+    color: var(--muted);
+    background: repeating-linear-gradient(
+      45deg, var(--surface), var(--surface) 8px, #1a1a1a 8px, #1a1a1a 16px
+    );
+  }
+
+  .row-info {
+    min-width: 0;
+  }
+  .row-artist {
+    font-size: 0.78rem;
+    color: var(--accent);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .row-title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 0.15rem;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .row-meta {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 0.25rem;
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  .row-meta a {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 0.72rem;
+  }
+  .row-meta a:hover { text-decoration: underline; }
+
+  /* ── Offer column ── */
+  .offer {
+    padding: 0.6rem 0.75rem;
+    background: rgba(255,255,255,0.02);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    transition: border-color 0.15s;
+  }
+  .offer:hover {
+    border-color: #444;
+  }
+  .offer-price {
+    font-family: 'Ovo', serif;
+    font-size: 1.15rem;
+    color: var(--green);
+    line-height: 1;
+  }
+  .offer-shipping {
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+  .offer-label {
+    font-size: 0.72rem;
+    color: var(--text);
+    margin-top: 0.3rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .offer-detail {
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-top: 0.1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .offer-link {
+    display: inline-block;
+    margin-top: 0.35rem;
+    font-size: 0.7rem;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .offer-link:hover { text-decoration: underline; }
+
+  .offer.empty {
+    opacity: 0.25;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .offer.empty .offer-price {
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  .row-error {
+    font-size: 0.78rem;
+    color: var(--red);
+    grid-column: 3 / -1;
+  }
+
+  /* ── Footer ── */
+  footer {
+    border-top: 1px solid var(--border);
+    padding: 2rem 4rem;
+    font-size: 0.8rem;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .album-row {
+      grid-template-columns: 60px 1fr;
+      gap: 0.75rem 1rem;
+    }
+    .offer { grid-column: 1 / -1; }
+    header { padding: 2rem 1.5rem 1.5rem; }
+    .controls { padding: 0.75rem 1.5rem; }
+    .content { padding: 1.5rem; }
+    footer { padding: 1.5rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1>Vinyl <em>Wishlist</em> <span class="h1-sub">Price Tracker</span></h1>
+    <div class="subtitle">Discogs Marketplace &middot; M / NM &middot; ships from Europe</div>
+  </div>
+  <div class="header-right">
+    <span class="count" id="count">3</span>
+    albums tracked<br>
+    <span style="font-size:0.75rem">synced 2026-03-27 17:08 UTC</span>
+  </div>
+</header>
+
+<div class="controls">
+  <button class="sort-btn active" data-sort="artist">Artist</button>
+  <button class="sort-btn" data-sort="price-asc">Price &uarr;</button>
+  <button class="sort-btn" data-sort="price-desc">Price &darr;</button>
+  <div class="search-wrap">
+    <input type="text" id="search" placeholder="Search...">
+  </div>
+</div>
+
+<div class="content">
+  <div class="album-list" id="grid"></div>
+</div>
+
+<footer>
+  <div>Top 3 cheapest M / NM offers &middot; media &amp; sleeve &middot; ships from Europe &middot; price includes shipping</div>
+  <div>Built with Discogs</div>
+</footer>
+
+<script>
+const DATA = [{"query": "Radiohead - OK Computer", "artist": "Radiohead", "album": "OK Computer", "year": 1997, "master_id": 21491, "release_id": null, "master_url": "https://www.discogs.com/master/21491", "cover": "covers/21491.jpg", "marketplace_url": "https://www.discogs.com/sell/list?master_id=21491&ev=mb&condition=Mint+%28M%29&condition=Near+Mint+%28NM+or+M-%29&format=Vinyl&sort=price%2Casc", "offers": [{"url": "https://www.discogs.com/sell/item/1681683880", "title": "Radiohead - OK Computer (CD, Album)", "label": "Parlophone", "catno": "7243 8 55229 2 5, CDNODATA 02", "media_condition": "Media:", "sleeve_condition": "Near Mint (NM or M-)", "ships_from": "Germany", "shipping_text": "€2.50", "total_eur": 7.5}, {"url": "https://www.discogs.com/sell/item/3904152253", "title": "Radiohead - OK Computer (CD, Album, RE)", "label": "Parlophone", "catno": "7243 8 55229 2 5, CDNODATA 02", "media_condition": "Media:", "sleeve_condition": "Mint (M)", "ships_from": "Germany", "shipping_text": "€3.00", "total_eur": 7.9}, {"url": "https://www.discogs.com/sell/item/4074255967", "title": "Radiohead - OK Computer (CD, Album)", "label": "Parlophone", "catno": "7243 8 55229 2 5, CDNODATA 02", "media_condition": "Media:", "sleeve_condition": "Near Mint (NM or M-)", "ships_from": "Netherlands", "shipping_text": "€3.99", "total_eur": 8.49}], "lowest_price": 7.5, "currency": "EUR", "error": null}, {"query": "Portishead - Dummy", "artist": "Portishead", "album": "Dummy", "year": 1994, "master_id": 5542, "release_id": null, "master_url": "https://www.discogs.com/master/5542", "cover": "covers/5542.jpg", "marketplace_url": "https://www.discogs.com/sell/list?master_id=5542&ev=mb&condition=Mint+%28M%29&condition=Near+Mint+%28NM+or+M-%29&format=Vinyl&sort=price%2Casc", "offers": [{"url": "https://www.discogs.com/sell/item/3262994753", "title": "Portishead - Dummy (CD, Album, RE, PMD)", "label": "Go! Beat", "catno": "828 553 - 2, 828 553-2", "media_condition": "Media:", "sleeve_condition": "Near Mint (NM or M-)", "ships_from": "Switzerland", "shipping_text": "€2.50", "total_eur": 6.5}, {"url": "https://www.discogs.com/sell/item/3724120975", "title": "Portishead - Dummy (CD, Album, RE, PMD)", "label": "Go! Beat", "catno": "828 553 - 2, 828 553-2", "media_condition": "Media:", "sleeve_condition": "Near Mint (NM or M-)", "ships_from": "Germany", "shipping_text": "€2.20", "total_eur": 7.2}, {"url": "https://www.discogs.com/sell/item/2127019016", "title": "Portishead - Dummy (CD, Album, RE, Arv)", "label": "Go! Beat", "catno": "828 553-2", "media_condition": "Media:", "sleeve_condition": "Near Mint (NM or M-)", "ships_from": "Germany", "shipping_text": "€4.50", "total_eur": 9.5}], "lowest_price": 6.5, "currency": "EUR", "error": null}, {"query": "Boards Of Canada - Music Has The Right To Children", "artist": "Boards Of Canada", "album": "Music Has The Right To Children", "year": 1998, "master_id": 1893, "release_id": null, "master_url": "https://www.discogs.com/master/1893", "cover": "covers/1893.jpg", "marketplace_url": "https://www.discogs.com/sell/list?master_id=1893&ev=mb&condition=Mint+%28M%29&condition=Near+Mint+%28NM+or+M-%29&format=Vinyl&sort=price%2Casc", "offers": [{"url": "https://www.discogs.com/sell/item/4024066299", "title": "Boards Of Canada - Music Has The Right To Children (CD, Album)", "label": "Rough Trade", "catno": "rtd 126.3460.2", "media_condition": "Media:", "sleeve_condition": "Near Mint (NM or M-)", "ships_from": "Italy", "shipping_text": "€4.00", "total_eur": 25.99}, {"url": "https://www.discogs.com/sell/item/3745909003", "title": "Boards Of Canada - Music Has The Right To Children (CD, Album, RE, Dig)", "label": "Warp Records", "catno": "warpcd55, warpcd55x, skald1", "media_condition": "Media:", "sleeve_condition": "Near Mint (NM or M-)", "ships_from": "Belgium", "shipping_text": "€14.00", "total_eur": 26.0}, {"url": "https://www.discogs.com/sell/item/3827532152", "title": "Boards Of Canada - Music Has The Right To Children (CD, Album, RE, Dig)", "label": "Warp Records", "catno": "warpcd55x, skald1", "media_condition": "Media:", "sleeve_condition": "Near Mint (NM or M-)", "ships_from": "Spain", "shipping_text": "€15.50", "total_eur": 30.5}], "lowest_price": 25.99, "currency": "EUR", "error": null}];
+
+function renderRow(item, index) {
+  const cover = item.cover
+    ? `<img src="${item.cover}" alt="" loading="lazy">`
+    : `<div class="cover-placeholder">&#9834;</div>`;
+
+  const offers = (item.offers || []);
+  let offerCols = '';
+
+  for (let i = 0; i < 3; i++) {
+    if (i < offers.length) {
+      const o = offers[i];
+      offerCols += `<div class="offer">
+        <div class="offer-price">&euro;${o.total_eur.toFixed(2)}</div>
+        <div class="offer-shipping">${esc(o.shipping_text || '')}</div>
+        <div class="offer-label">${esc(o.label || '')}</div>
+        <div class="offer-detail">${esc(o.ships_from || '')} &middot; ${esc(o.sleeve_condition || '')}</div>
+        <a class="offer-link" href="${o.url}" target="_blank" rel="noopener">view listing &rarr;</a>
+      </div>`;
+    } else {
+      offerCols += `<div class="offer empty"><div class="offer-price">&mdash;</div></div>`;
+    }
+  }
+
+  const errorHtml = item.error
+    ? `<div class="row-error">${esc(item.error)}</div>`
+    : '';
+
+  const metaParts = [];
+  if (item.year) metaParts.push(item.year);
+
+  const links = [];
+  if (item.marketplace_url) links.push(`<a href="${item.marketplace_url}" target="_blank" rel="noopener">all M/NM</a>`);
+  if (item.master_url) links.push(`<a href="${item.master_url}" target="_blank" rel="noopener">discogs</a>`);
+
+  return `<div class="album-row${item.error ? ' has-error' : ''}" data-index="${index}">
+    <div class="cover-wrap">${cover}</div>
+    <div class="row-info">
+      <div class="row-artist">${esc(item.artist)}</div>
+      <div class="row-title">${esc(item.album)}</div>
+      <div class="row-meta">
+        <span>${metaParts.join(' &middot; ')}</span>
+        ${links.join(' ')}
+      </div>
+    </div>
+    ${errorHtml || offerCols}
+  </div>`;
+}
+
+function esc(s) {
+  const d = document.createElement('div');
+  d.textContent = String(s);
+  return d.innerHTML;
+}
+
+// ── Sort & filter ──
+let currentSort = 'artist';
+let currentFilter = '';
+
+function sortAndRender() {
+  let items = DATA.map((item, i) => ({ ...item, _origIdx: i }));
+
+  if (currentFilter) {
+    const q = currentFilter.toLowerCase();
+    items = items.filter(it =>
+      (it.artist + ' ' + it.album + ' ' + it.query).toLowerCase().includes(q)
+    );
+  }
+
+  if (currentSort === 'artist') {
+    items.sort((a, b) => (a.artist || '').localeCompare(b.artist || ''));
+  } else if (currentSort === 'price-asc') {
+    items.sort((a, b) => (a.lowest_price ?? Infinity) - (b.lowest_price ?? Infinity));
+  } else if (currentSort === 'price-desc') {
+    items.sort((a, b) => (b.lowest_price ?? -1) - (a.lowest_price ?? -1));
+  }
+
+  document.getElementById('grid').innerHTML = items.map(it => renderRow(it, it._origIdx)).join('');
+}
+
+document.querySelectorAll('.sort-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentSort = btn.dataset.sort;
+    sortAndRender();
+  });
+});
+
+document.getElementById('search').addEventListener('input', e => {
+  currentFilter = e.target.value;
+  sortAndRender();
+});
+
+sortAndRender();
+</script>
+</body>
+</html>

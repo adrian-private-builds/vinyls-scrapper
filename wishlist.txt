@@ -1,0 +1,13 @@
+# ── Vinyl Wishlist ─────────────────────────────────────
+# One album per line:  Artist - Album
+# Or paste a Discogs URL for exact match:
+#   https://www.discogs.com/master/3948
+#   https://www.discogs.com/release/597668
+#
+# Add a line to track, delete a line to stop tracking.
+# Lines starting with # are ignored.
+# ──────────────────────────────────────────────────────
+
+Radiohead - OK Computer
+Portishead - Dummy
+Boards Of Canada - Music Has The Right To Children
