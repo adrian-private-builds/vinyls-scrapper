@@ -277,12 +277,14 @@ def scrape_cheapest_offers(scraper, master_id=None, release_id=None, max_pages=3
             f"https://www.discogs.com/sell/list?master_id={master_id}"
             f"&ev=mb"
             f"&condition=Near+Mint+%28NM+or+M-%29"
+            f"&format=Vinyl"
             f"&sort=price%2Casc&limit=50"
         )
     elif release_id:
         base_url = (
             f"https://www.discogs.com/sell/release/{release_id}"
             f"?condition=Near+Mint+%28NM+or+M-%29"
+            f"&format=Vinyl"
             f"&sort=price%2Casc&limit=50"
         )
     else:
