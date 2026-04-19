@@ -1,5 +1,4 @@
 .env
-covers/
 prices.json
 sync.log
 __pycache__/
